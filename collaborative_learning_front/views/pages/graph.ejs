@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="">
+	<meta name="author" content="">
+
+	<title>Collaborative Learning</title>
+
+	<!-- Bootstrap Core CSS -->
+	<link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+	<!-- MetisMenu CSS -->
+	<link href="../vendor/metisMenu/metisMenu.min.css" rel="stylesheet">
+
+	<!-- Custom CSS -->
+	<link href="../dist/css/sb-admin-2.css" rel="stylesheet">
+
+	<!-- Custom Fonts -->
+	<link href="../vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+	<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+	<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+	<![endif]-->
+	<link href="/stylesheets/style.css" rel="stylesheet" />
+	<script src="/cytoscape/cytoscape.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Collaborative Learning - Select LO to learn</h3>
+                    </div>
+                    <div class="panel-body" style="padding: 30 15px; min-height: 568px; background-color: white;">
+                        <div id="cy" style="margin-top: 30px"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/CookieManager.js"></script>
+	<script>
+        var cy = cytoscape({
+            container: document.getElementById('cy'),
+
+            style: [
+                {
+                    selector: 'node',
+                    style: {
+                        'content': 'data(id)',
+                        'font-size' :  10,
+                        'text-opacity': 2,
+                        'text-wrap': 'wrap',
+
+                        'background-color': function( ele ){ return ele.data('color') },
+
+                        'label' : 'data(label)'
+                    }
+                },
+
+                {
+                    selector: 'edge',
+                    style: {
+                        'width': 4,
+                        'target-arrow-shape': 'triangle',
+                        'line-color': '#9dbaea',
+                        'target-arrow-color': '#9dbaea'
+                    }
+                }
+            ],
+
+            <%- elements %>
+            layout : {
+                name: 'breadthfirst',
+                directed: true,
+                fit: true,
+                spacingFactor: 0.5,
+            }
+
+        });
+
+        cy.on('click', 'node', function(e){
+
+            console.log( 'clicked ' + this.id() );
+            var id = this.id();
+
+            //var ele = e.cyTarget;
+            var ele = e.target;
+            var elementJSON = ele.json();
+            console.debug('elementJSON : ', elementJSON);
+
+            if( elementJSON.data.color === '#ccc') {
+                alert("This element is not yet available!");
+            } else {
+                var waitingTime = 30;//prompt("Please enter your waiting time in seconds", 30);
+                if(waitingTime > 0){
+                    createCookie('CURRENT_LO_ID', elementJSON.data.id, 90);
+                    createCookie('CURRENT_LO_LABEL', elementJSON.data.label, 90);
+                    createCookie('CURRENT_LO_COLOR', elementJSON.data.color, 90);
+                    createCookie('WAITING_TIME', waitingTime, 90);
+                    //window.location = '/pages/wait.html';
+                    window.location = '/pages/learning-session.html';
+                }
+
+                //htmldata = "<form action='formation' id='form' method='POST'> <input type='hidden' value='"+id+"' name='id' /> </form>";
+                //$("#body").append(htmldata);
+                //$("#form").submit();
+            }
+
+        });
+
+        cy.fit(cy);
+        cy.resize();
+	</script>
+
+    <!-- jQuery -->
+    <script src="../vendor/jquery/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
+
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="../vendor/metisMenu/metisMenu.min.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="../dist/js/sb-admin-2.js"></script>
+
+    <!-- Personal JavaScript -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="application/javascript">
+        //var socket = io();
+    </script>
+
+</body>
+
+</html>

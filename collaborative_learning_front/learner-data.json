@@ -1,0 +1,54 @@
+[
+  {
+    "email": "learner1",
+    "password": "pass1",
+    "languages": [
+      "fr",
+      "en",
+      "ar"
+    ],
+    "los": [
+      "LO1",
+      "LO2"
+    ]
+  },
+  {
+    "email": "learner2",
+    "password": "pass2",
+    "languages": [
+      "fr",
+      "en",
+      "ar"
+    ],
+    "los": [
+      "LO1",
+      "LO2"
+    ]
+  },
+  {
+    "email": "learner3",
+    "password": "pass3",
+    "languages": [
+      "fr",
+      "en",
+      "ar"
+    ],
+    "los": [
+      "LO1",
+      "LO2"
+    ]
+  },
+  {
+    "email": "learner4",
+    "password": "pass4",
+    "languages": [
+      "fr",
+      "en",
+      "ar"
+    ],
+    "los": [
+      "LO1",
+      "LO2"
+    ]
+  }
+]

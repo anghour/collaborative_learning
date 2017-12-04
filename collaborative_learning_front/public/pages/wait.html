@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Collaborative Learning</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- MetisMenu CSS -->
+    <link href="../vendor/metisMenu/metisMenu.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="../dist/css/sb-admin-2.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="../vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 col-md-offset-4">
+                <div class="login-panel panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Collaborative Learning - Waiting...</h3>
+                    </div>
+                    <div class="panel-body" id="login_div">
+                        <form role="form" method="post">
+                            <fieldset>
+                                <div class="form-group">
+                                    <p id="currentLo" style="font-weight: bold;">Accessing LO</p>
+                                </div>
+                                <div class="form-group">
+                                    <p id="onlineCount">Learners waiting on LO : 1</p>
+                                </div>
+                                <div class="form-group">
+                                    <!-- Display the countdown timer in an element -->
+                                    <p id="countdownElt" style="font-style: italic"></p>
+                                </div>
+                                <!--div class="form-group">
+                                    <input id="password" class="form-control" placeholder="Password" name="password" type="password" value="">
+                                </div-->
+
+                                <!-- Change this to a button or input when using this as a form -->
+                                <button id="btn_waitAgain" type="button" onclick="waitAgain()" class="btn btn-sm btn-success btn-block">Wait again</button>
+                                <!--a href="index.html" class="btn btn-sm btn-success btn-block">Login</a-->
+                                <a href="/pages/graph.html" class="btn-link btn-sm btn-info btn-block">Choose another element</a>
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="../vendor/jquery/jquery.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
+
+    <!-- Metis Menu Plugin JavaScript -->
+    <script src="../vendor/metisMenu/metisMenu.min.js"></script>
+
+    <!-- Custom Theme JavaScript -->
+    <script src="../dist/js/sb-admin-2.js"></script>
+
+    <!-- Personal JavaScript -->
+    <script src="/js/CookieManager.js"></script>
+    <script>
+        //Get current user ans current LO
+        var currentLo = {'id': getCookie('CURRENT_LO_ID'), 'label':getCookie('CURRENT_LO_LABEL'), 'color':getCookie('CURRENT_LO_COLOR')};
+        console.debug('currentLo : ', currentLo);
+
+        document.getElementById("currentLo").innerHTML = "Want to learn : " + currentLo.id + " - " + currentLo.label;
+
+        //Waiting mechanism
+        function wait(){
+            //Hide the button 'Wait again'
+            $('#btn_waitAgain').hide();
+
+            // Set the date we're counting down to
+            var waitingTime = getCookie('WAITING_TIME');
+            if(!waitingTime){
+                waitingTime = 30;
+            }
+            var countDownDate = new Date().getTime() + waitingTime * 1000 + 2000;//new Date("Jun 15, 2017 13:50:00").getTime();
+
+            // Update the count down every 1 second
+            var x = setInterval(function() {
+
+                // Get todays date and time
+                var now = new Date().getTime();
+
+                // Find the distance between now an the count down date
+                var distance = countDownDate - now;
+
+                // Time calculations for days, hours, minutes and seconds
+                var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                // Display the result in the element with id="countdownElt"
+                //document.getElementById("countdownElt").innerHTML = days + "d " + hours + "h "
+                document.getElementById("countdownElt").innerHTML = "Waiting for other learners... " + seconds + " seconds. ";
+
+                // If the count down is finished, write some text
+                if (distance < 0) {
+                    clearInterval(x);
+                    //document.getElementById("countdownElt").innerHTML = "EXPIRED";
+                    //$('#btn_waitAgain').show();
+                }
+            }, 1000);
+
+            return x;
+        }
+
+        function waitAgain() {
+            clearInterval(currentInterval);
+            currentInterval = wait();
+        }
+
+        var currentInterval = wait();
+
+    </script>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="application/javascript">
+
+        //Send learning-event
+        var user = {
+            username : getCookie('CURRENT_USER'),
+            timeToWait : getCookie('WAITING_TIME'),
+            timeToWait : getCookie('WAITING_TIME'),
+            lo : getCookie('CURRENT_LO_ID')
+        };
+        if (user.username.length > 0) { // Si le champ de connexion n'est pas vide
+            var socket = io();
+            socket.emit('learning-event', user, function(success) {
+                if (success) {
+                    console.debug('learning-event success');
+                    //window.location = '/pages/learning-session.html';
+                }
+            });
+        }
+
+        /**
+         * Réception d'un message d'echec de construction du groupe
+         */
+        socket.on('group-build', function(message) {
+            var state = message.state;
+            if(state === 'FAILED'){// Orienter l'apprenant vers une autre solution
+                clearInterval(currentInterval);
+                //alert("Construction du groupe : "+state);
+                document.getElementById("countdownElt").innerHTML = "EXPIRED";
+                $('#btn_waitAgain').show();
+            }
+            if(state === 'SUCCESS'){// Activer le chat
+                //alert("Construction du groupe : "+state);
+                //document.getElementById('m').disabled = false;
+                window.location = '/pages/learning-session.html';
+            }
+        });
+
+        /**
+        * Réception de l'id du groupe
+        */
+        var groupId;
+        socket.on('group-id', function(message) {
+            groupId = message.groupId
+            console.log("Goupe = " + groupId);
+            createCookie('CURRENT_GROUP_ID', groupId, 90);
+        });
+
+        /**
+         * Connexion d'un nouvel utilisateur
+         */
+        var onlineCount = 1;
+        socket.on('user-add', function(user) {
+            console.debug('user-add : ', user);
+            onlineCount ++;
+            document.getElementById('onlineCount').innerHTML = 'Learners waiting on LO : ' + onlineCount;
+        });
+
+    </script>
+
+</body>
+
+</html>
